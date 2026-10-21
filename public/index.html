@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#4f46e5" />
+    <title>sistem data barang</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="vendor/html5-qrcode/html5-qrcode.min.js"></script>
+    <script src="vendor/jsqr/jsQR.js"></script>
+    <script type="module" src="js/app.js"></script>
+  </head>
+  <body data-mode="IN">
+    <header>
+      <div class="wrap top">
+        <div class="brand">
+          <div class="logo">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M20 20h1v1" />
+            </svg>
+          </div>
+          <div>
+            <h1>sistem data barang</h1>
+            <p>scan QR code</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="stats">
+        <div class="stat"><span>Jenis barang</span><b id="sItems">0</b></div>
+        <div class="stat">
+          <span>Total stok (unit)</span><b id="sUnits">0</b>
+        </div>
+        <div class="stat warn">
+          <span>Menipis / habis</span><b id="sLow">0</b>
+        </div>
+        <div class="stat">
+          <span>Transaksi hari ini</span><b id="sToday">0</b>
+        </div>
+      </section>
+
+      <div class="grid">
+        <section class="card">
+          <h2>Scanner</h2>
+
+          <div class="seg" id="modeSeg" role="group" aria-label="Mode scan">
+            <button type="button" data-mode="IN" class="on">
+              Barang Masuk (+)
+            </button>
+            <button type="button" data-mode="OUT">Barang Keluar (−)</button>
+          </div>
+          <p class="hint" id="modeHint">Setiap scan MENAMBAH stok.</p>
+
+          <div class="qtyrow">
+            <span>Jumlah per scan</span>
+            <div class="stepper">
+              <button type="button" id="qMinus" aria-label="Kurangi jumlah">
+                −
+              </button>
+              <input
+                type="number"
+                id="qty"
+                min="1"
+                max="100000"
+                value="1"
+                inputmode="numeric"
+                aria-label="Jumlah per scan"
+              />
+              <button type="button" id="qPlus" aria-label="Tambah jumlah">
+                +
+              </button>
+            </div>
+          </div>
+
+          <div id="reader">Kamera belum aktif.<br />Tekan “Mulai Scan”.</div>
+          <div id="readerFile" hidden></div>
+          <div class="row">
+            <button class="primary" id="btnStart">Mulai Scan</button>
+            <button id="btnStop" disabled>Berhenti</button>
+            <button id="btnSwitch" disabled>Ganti Kamera</button>
+            <label class="btn"
+              >Dari Gambar<input
+                type="file"
+                id="fileIn"
+                accept="image/*"
+                hidden
+            /></label>
+          </div>
+          <div class="manual">
+            <input
+              type="text"
+              id="manualIn"
+              placeholder="Atau ketik / scan dengan alat scanner USB lalu Enter"
+              autocomplete="off"
+            />
+            <button id="btnManual">Tambah</button>
+          </div>
+          <div class="opts">
+            <label
+              ><input type="checkbox" id="optDedupe" /> Tolak data yang sudah
+              pernah di-scan (kode sama)</label
+            >
+            <label
+              ><input type="checkbox" id="optSound" checked /> Bunyi beep saat
+              berhasil</label
+            >
+          </div>
+          <div class="last">
+            <small>Scan terakhir</small>
+            <div class="lastcode" id="lastCode">—</div>
+            <div id="lastName"></div>
+            <div class="laststock" id="lastStock"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="tabs" role="tablist">
+            <button type="button" role="tab" data-tab="stock" class="on">
+              Stok
+            </button>
+            <button type="button" role="tab" data-tab="moves">Riwayat</button>
+          </div>
+
+          <div class="toolbar">
+            <input
+              type="search"
+              id="search"
+              placeholder="Cari kode, nama barang, atau catatan…"
+            />
+            <button class="primary" id="btnExport">Unduh Excel</button>
+            <button class="danger" id="btnClear" hidden>
+              Hapus Semua Riwayat
+            </button>
+          </div>
+
+          <div class="syncbar" id="syncBar" hidden>
+            <span class="dot" id="syncDot"></span>
+            <span id="syncText">Google Sheets: menghubungkan…</span>
+            <a id="syncLink" href="#" target="_blank" rel="noopener" hidden
+              >Buka Google Sheets</a
+            >
+            <button type="button" id="btnSync">Sinkron Sekarang</button>
+          </div>
+
+          <div class="tablebox" id="paneStock">
+            <table>
+              <thead>
+                <tr>
+                  <th>Kode</th>
+                  <th>Nama Barang</th>
+                  <th class="num">Masuk</th>
+                  <th class="num">Keluar</th>
+                  <th class="num">Stok</th>
+                  <th class="num">Min</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="tbStock"></tbody>
+            </table>
+            <div class="empty" id="emptyStock">
+              Belum ada barang. Pilih “Barang Masuk”, lalu scan QR pertama Anda.
+            </div>
+          </div>
+
+          <div class="tablebox" id="paneMoves" hidden>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Waktu</th>
+                  <th>Jenis</th>
+                  <th>Kode</th>
+                  <th>Nama Barang</th>
+                  <th class="num">Jumlah</th>
+                  <th>Catatan</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbMoves"></tbody>
+            </table>
+            <div class="empty" id="emptyMoves">Belum ada transaksi.</div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <div id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

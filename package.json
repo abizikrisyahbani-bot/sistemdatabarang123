@@ -1,0 +1,22 @@
+{
+  "name": "qr-to-excel",
+  "version": "1.0.0",
+  "description": "Scanner QR berbasis web yang menyimpan data ke database SQLite dan mengekspor ke Excel",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^18.0.8",
+    "exceljs": "^4.4.0",
+    "express": "^5.3.0",
+    "html5-qrcode": "^2.3.8",
+    "jsqr": "^1.4.0"
+  }
+}
